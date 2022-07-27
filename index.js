@@ -22,7 +22,7 @@ const app = express();
 // Le indicamos a express que reciba  req json
 app.use(express.json());
 // Llamamos a las rutas
-app.use('/api/v1', authRouter);
+app.use('/api/v1/auth', authRouter);
 
 // Esta variable de entorno ya esta configurada en heroku
 const PORT = process.env.PORT || 5000;
