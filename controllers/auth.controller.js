@@ -1,6 +1,7 @@
 import { User } from '../models/UserModel.js';
 import jwt from 'jsonwebtoken';
-import { generateToken } from '../helpers/generateTokens.js';
+import { generateRefreshToken, generateToken } from '../helpers/managerTokens.js';
+import { errorsToken } from '../helpers/errorsToken.js';
 
 // Registar usuario
 export const register = async (req, res) => {
@@ -48,10 +49,57 @@ export const login = async (req, res) => {
     //no enviar info privada en el payload
     // const token = jwt.sign({ uid: user._id }, process.env.JWT_SECRET);
     const { token, expiresIn } = generateToken(user._id);
+    generateRefreshToken(user._id, res);
 
-    return res.json({ ok: 'login', token });
+    return res.json({ ok: 'login', token, expiresIn });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ Error: 'error de servidor' });
+  }
+};
+
+export const userInfo = async (req, res) => {
+  try {
+    //req.uid viene del middleware donde se validó si era un token valido
+    const user = await User.findById(req.uid).lean();
+
+    return res.json({
+      user: {
+        email: user.email,
+        uid: user._id,
+      },
+    });
+  } catch (error) {
+    // console.log(error);
+    return res.status(500).json({ Error: 'error de servidor' });
+  }
+};
+
+// Tiene que leer la cookie para acceder al refreshToken
+// El refreshToken se enviará y hará la comprobacion
+// Si es correcto todo, este enviará el verdadero token para hacer la solicitud
+export const refreshToken = (req, res) => {
+  try {
+    const refreshTokenCookie = req.cookies.refreshToken;
+    if (!refreshTokenCookie) throw new Error('No token');
+
+    // verificamos el refreshToken
+    // uid es el id del usuario que viene en el payload
+    const { uid } = jwt.verify(refreshTokenCookie, process.env.JWT_REFRESH);
+    //feberamos un nuevo token y lo devolvemos a la vista
+    const { token, expiresIn } = generateToken(uid);
+    return res.json({ ok: 'login', token, expiresIn });
+  } catch (error) {
+    console.log(error);
+    return res.status(401).json({ error: errorsToken(error.message) });
+  }
+};
+
+export const logout = (req, res) => {
+  try {
+    res.clearCookie('resfreshToken');
+    res.json({ logout: true });
+  } catch (error) {
+    console.log(error);
   }
 };

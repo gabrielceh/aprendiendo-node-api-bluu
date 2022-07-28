@@ -13,6 +13,7 @@
 // Para usar import, en el package.json, añadir "type":"module"
 import 'dotenv/config';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 
 import './database/connectdb.js';
 // rutas
@@ -21,6 +22,8 @@ import authRouter from './routes/auth.route.js';
 const app = express();
 // Le indicamos a express que reciba  req json
 app.use(express.json());
+// le indicamos a express que a partir de ahora puede usar cookies
+app.use(cookieParser());
 // Llamamos a las rutas
 app.use('/api/v1/auth', authRouter);
 
