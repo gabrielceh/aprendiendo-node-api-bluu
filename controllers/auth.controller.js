@@ -1,5 +1,4 @@
 import { User } from '../models/UserModel.js';
-import jwt from 'jsonwebtoken';
 import { generateRefreshToken, generateToken } from '../helpers/managerTokens.js';
 import { errorsToken } from '../helpers/errorsToken.js';
 
@@ -18,10 +17,13 @@ export const register = async (req, res) => {
 
     await user.save();
     // jwt token
-
+    const { token, expiresIn } = generateRefreshToken(user._id, res);
     // status 201: creado
     return res.status(201).json({
       isRegister: true,
+      token,
+      expiresIn,
+      email,
     });
   } catch (error) {
     console.log(error);
@@ -80,14 +82,9 @@ export const userInfo = async (req, res) => {
 // Si es correcto todo, este enviará el verdadero token para hacer la solicitud
 export const refreshToken = (req, res) => {
   try {
-    const refreshTokenCookie = req.cookies.refreshToken;
-    if (!refreshTokenCookie) throw new Error('No token');
+    //deberamos un nuevo token y lo devolvemos a la vista
 
-    // verificamos el refreshToken
-    // uid es el id del usuario que viene en el payload
-    const { uid } = jwt.verify(refreshTokenCookie, process.env.JWT_REFRESH);
-    //feberamos un nuevo token y lo devolvemos a la vista
-    const { token, expiresIn } = generateToken(uid);
+    const { token, expiresIn } = generateToken(req.uid);
     return res.json({ ok: 'login', token, expiresIn });
   } catch (error) {
     console.log(error);
@@ -101,5 +98,6 @@ export const logout = (req, res) => {
     res.json({ logout: true });
   } catch (error) {
     console.log(error);
+    return res.status(401).json({ error: errorsToken(error.message) });
   }
 };

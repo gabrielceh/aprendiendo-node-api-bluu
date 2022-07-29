@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
 
-import { login, register, userInfo, refreshToken, logout } from '../controllers/auth.controller.js';
 import { requireToken } from '../middleware/requireToken.js';
-import { validationBodyLogin, validationBodyRegister } from '../middleware/validationBodies.js';
-import { validationResultExpress } from '../middleware/validationResult.js';
+import { requireRefreshToken } from '../middleware/requireRefreshToken.js';
+import { validationBodyLogin, validationBodyRegister } from '../middleware/validationManager.js';
+import { login, register, userInfo, refreshToken, logout } from '../controllers/auth.controller.js';
 
 const router = Router();
 
@@ -12,15 +12,14 @@ router.post(
   '/register',
   // comprobaciones de express-validator
   validationBodyRegister,
-  validationResultExpress,
   register
 );
 
-router.post('/login', validationBodyLogin, validationResultExpress, login);
+router.post('/login', validationBodyLogin, login);
 
 router.get('/user-info', requireToken, userInfo);
 
-router.get('/refresh', refreshToken);
+router.get('/refresh', requireRefreshToken, refreshToken);
 
 router.get('/logout', logout);
 
