@@ -14,11 +14,11 @@
 
 // Para usar import, en el package.json, añadir "type":"module"
 import 'dotenv/config'; // siempre arriba del todo
+//DB
+import './database/connectdb.js';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-//DB
-import './database/connectdb.js';
 // rutas
 import authRouter from './routes/auth.route.js';
 import linkRouter from './routes/link.route.js';
@@ -34,12 +34,14 @@ const whiteList = [process.env.ORIGIN_1, process.env.ORIGIN_2];
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (whiteList.includes(origin)) {
+      // origin es las paginas admitidas. si origin es undefined, es porque origin es el server donde esta alojada la api, por ende debe ser falso
+      if (!origin || whiteList.includes(origin)) {
         // en caso que sea cierto, al callback le pasamos el error en null
         return callback(null, origin);
       }
       return callback(`Error de CORS - origin: ${origin} No autorizado`);
     },
+    credentials: true,
   })
 );
 
