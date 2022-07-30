@@ -27,7 +27,7 @@ import redirectRouter from './routes/redirect.route.js';
 const app = express();
 
 //Todos los sitios que tienen permitido el acces al backend
-const whiteList = [process.env.ORIGIN_1];
+const whiteList = [process.env.ORIGIN_1, process.env.ORIGIN_2];
 
 //CORS: si lo dejamos de esta manera TODOS los sitios web tendran acceso al backend
 // app.use(cors())
