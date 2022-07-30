@@ -13,16 +13,36 @@
  */
 
 // Para usar import, en el package.json, añadir "type":"module"
-import 'dotenv/config';
+import 'dotenv/config'; // siempre arriba del todo
 import express from 'express';
 import cookieParser from 'cookie-parser';
-
+import cors from 'cors';
+//DB
 import './database/connectdb.js';
 // rutas
 import authRouter from './routes/auth.route.js';
 import linkRouter from './routes/link.route.js';
+import redirectRouter from './routes/redirect.route.js';
 
 const app = express();
+
+//Todos los sitios que tienen permitido el acces al backend
+const whiteList = [process.env.ORIGIN_1];
+
+//CORS: si lo dejamos de esta manera TODOS los sitios web tendran acceso al backend
+// app.use(cors())
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (whiteList.includes(origin)) {
+        // en caso que sea cierto, al callback le pasamos el error en null
+        return callback(null, origin);
+      }
+      return callback(`Error de CORS - origin: ${origin} No autorizado`);
+    },
+  })
+);
+
 // Le indicamos a express que reciba  req json
 app.use(express.json());
 // le indicamos a express que a partir de ahora puede usar cookies
@@ -31,6 +51,7 @@ app.use(cookieParser());
 // Llamamos a las rutas
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/links', linkRouter);
+app.use('/', redirectRouter); //Opcional: ruta de ejemplo si el front tienen el mismo dominio que el backend
 
 // Esta variable de entorno ya esta configurada en heroku
 const PORT = process.env.PORT || 5000;
