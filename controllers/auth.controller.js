@@ -17,7 +17,8 @@ export const register = async (req, res) => {
 
     await user.save();
     // jwt token
-    const { token, expiresIn } = generateRefreshToken(user._id, res);
+    const { token, expiresIn } = generateToken(user._id, res);
+    generateRefreshToken(user._id, res);
     // status 201: creado
     return res.status(201).json({
       isRegister: true,
@@ -94,7 +95,7 @@ export const refreshToken = (req, res) => {
 
 export const logout = (req, res) => {
   try {
-    res.clearCookie('resfreshToken');
+    res.clearCookie('refreshToken');
     res.json({ logout: true });
   } catch (error) {
     console.log(error);
