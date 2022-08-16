@@ -28,6 +28,7 @@ export const generateRefreshToken = (uid, res) => {
       // Para que sea https, pero como es una api rest en modo desarrollo, si se coloca en true, falla
       secure: !(process.env.MODE === 'developer'),
       expires: new Date(Date.now() + expiresIn * 1000),
+      sameSite: 'none',
     });
   } catch (error) {
     console.log(error);
