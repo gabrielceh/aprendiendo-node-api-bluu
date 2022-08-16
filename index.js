@@ -35,6 +35,7 @@ app.use(
   cors({
     origin: function (origin, callback) {
       console.log(whiteList);
+      console.log(whiteList.includes(origin));
       // origin es las paginas admitidas. si origin es undefined, es porque origin es el server donde esta alojada la api, por ende debe ser falso
       if (!origin || whiteList.includes(origin)) {
         // en caso que sea cierto, al callback le pasamos el error en null
